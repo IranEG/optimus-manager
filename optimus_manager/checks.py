@@ -52,6 +52,20 @@ def get_active_renderer():
         return "nvidia"
     else:
         return "integrated"
+    
+def get_integrated_provider():
+
+    try:
+        out = subprocess.check_output(
+            "xrandr --listproviders", shell=True, text=True, stderr=subprocess.PIPE).strip()
+    except subprocess.CalledProcessError as e:
+        raise CheckError("Cannot list xrandr providers:\n{e.stderr}") from e
+    
+    for line in out.splitlines():
+        for _p in line.split():
+            if _p in ["AMD", "Intel"]:
+                return line.split("name:")[1]
+            return "modesetting"
 
 
 def is_module_available(module_name):
